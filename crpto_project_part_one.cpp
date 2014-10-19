@@ -1,3 +1,10 @@
+// We consider solving the problem from 3 situations:
+// 1st situation:
+//      
+// 2nd situation:
+//
+// 3rd situation:
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -5,35 +12,101 @@
 
 using namespace std;
 
-string decrypt(string ctext, vector<string> &plaintext, int t)
+// 1st situation: 
+string decrypt_1(string ctext, vector<string> &plaintext, int t)
 {
-    vector<int> vec_t(t, 0); // vector for storing the key
     int ctext_size = ctext.size();
-    string ptext (ctext_size, 0); // initialize the ptext string
-    for (int j = 1; j <= 40; ++j)
+    
+    for (int k=0; k<plaintext.size(); k++)
     {
-        for (int i=0; i<ctext_size; i++)
+        string temp_plain_string = plaintext[k];
+
+        int i=0;
+        for (; i<ctext_size-t; i++)
         {
-            ptext[i] = ctext[i] - (i/j)%t;
-        }
-        // compare the string ptext with input original message here? (by simply using "==" operator of string)
-        // OR by using mechanisms like "string similarity" to check which plaintext to choose
-        for (int i=0; i<plaintext.size(); i++)
-        {
-            if (plaintext[i]==ptext)
+            cout<<"t: "<<t<<endl;
+            cout<<"ctext i: "<<ctext[i]<<endl;
+            cout<<"ctext i+t: "<<ctext[i+t]<<endl;
+            cout<<"plain_text i: "<<temp_plain_string[i]<<endl;
+            cout<<"plain_text i+t: "<<temp_plain_string[i+t]<<endl;
+            if ((ctext[i]-temp_plain_string[i]) != (ctext[i+t]-temp_plain_string[i+t]))
             {
-                return ptext;
+                break;
+            }
+        }
+        if (i==(ctext_size-t)) return temp_plain_string;
+    }
+    // Assuming the input and out put text will always be lower case string
+	return "Not Found";
+}
+
+// 2nd situation:
+string decrypt_2(string ctext, vector<string> &plaintext, int t)
+{
+    int y = 0;
+    int L = ctext.size();
+    for (int l=0; l<plaintext.size(); l++)
+    {
+        string temp_plain_string = plaintext[l];
+        while ( (y<L) && !(ctext[y] - temp_plain_string[y]) )
+        {
+            y++;
+        }
+        y++;
+        
+        if (y == 1)
+        {
+            continue;
+        }
+        
+        else
+        {
+            int i=0;
+            for (; i<t; i++)
+            {
+                bool flag = 1;
+                for (int j=0; j<y-1; j++)
+                {
+                    if ( (ctext[i*y+j] - temp_plain_string[i*y+j]) != (ctext[i*y+j-1] - temp_plain_string[i*y+j-1]) )
+                    {
+                        flag = 0;
+                        break;
+                    }
+                }
+                if (!flag)
+                {
+                    break;
+                }
+            }
+            
+            if (i == t)
+            {
+                int k = 0;
+                for (; k<L-t*y; k++)
+                {
+                    if ( (ctext[k] - temp_plain_string[k]) != (ctext[k+t*y] - temp_plain_string[k+t*y]) )
+                    {
+                        break;
+                    }
+                }
+                if (k == L-t*y)
+                {
+                    return temp_plain_string;
+                }
             }
         }
     }
-	return "Not found";
+    return "Not Found";
 }
 
 
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
     ifstream ciphertext ( argv[1] );
     ifstream plaintext ( argv[2] );
+    int t = ( atoi(argv[3]) );
+
+    cout<<"Input t: "<<t<<endl;
 
     string result;
     string cipher_string;
@@ -46,7 +119,7 @@ int main(int argc, char const *argv[])
     {
         // Read input from the ciphertext
     	while ( ciphertext >> cipher_string )
-        	cout<< cipher_string<< endl;
+        	cout<< "Ciphertext: "<< cipher_string<< endl;
     }
 
     // read plain_text from std input
@@ -56,18 +129,24 @@ int main(int argc, char const *argv[])
     {
         // Read input from the plaintext
         string temp_plaintext_line;
-        while ( plaintext >>  temp_plaintext_line)
+        while ( plaintext >> temp_plaintext_line)
         {
             plaintext_vector.push_back(temp_plaintext_line);
-            cout<< temp_plaintext_line << endl;
+            cout<< "Plaintext: "<< temp_plaintext_line << endl;
         }
     }
 
     // Now the variable cipher_string stores the cipher text and
-    // plaintext_vector stores the original plain messages
-    // result = decrypt(cipher_string, plaintext_vector, 5);
+    // plaintext_vector stores the original plain messages, t stores the input t
+    result = decrypt_1(cipher_string, plaintext_vector, t);
+    if (result == "Not Found")
+    {
+        // If the 1st situation cannot decrypt, then go to situation 2 as below:
+        result = decrypt_2(cipher_string, plaintext_vector, t);
+    }
 
-    // cout<<result<<endl;
+    cout<<"result: ";
+    cout<<result<<endl;
     
 	return 0;
 }
