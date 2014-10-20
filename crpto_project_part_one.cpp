@@ -3,8 +3,6 @@
 //      
 // 2nd situation:
 //
-// 3rd situation:
-
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -43,10 +41,10 @@ string decrypt_1(string ctext, vector<string> &plaintext, int t)
 // 2nd situation:
 string decrypt_2(string ctext, vector<string> &plaintext, int t)
 {
-    int y = 0;
     int L = ctext.size();
     for (int l=0; l<plaintext.size(); l++)
     {
+        int y = 0;
         string temp_plain_string = plaintext[l];
         while ( (y<L) && !(ctext[y] - temp_plain_string[y]) )
         {
@@ -58,7 +56,6 @@ string decrypt_2(string ctext, vector<string> &plaintext, int t)
         {
             continue;
         }
-        
         else
         {
             int i=0;
